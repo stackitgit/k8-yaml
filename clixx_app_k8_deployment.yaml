@@ -1,0 +1,232 @@
+---
+- hosts: all
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  collections:
+    - cloud.common      
+    - kubernetes.core
+  tasks:
+      
+    - name: create service object from inline definition
+      k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: clixx-service
+            labels:
+              app: clixx-web-app
+              new_serv: CLIXX
+          spec:
+            type: LoadBalancer
+            selector:
+              app: clixx-web-app
+            ports:
+              - protocol: TCP
+                port: 8080
+                targetPort: 80
+                nodePort: 30000
+         
+
+
+    - name: scale deployment down to 0 pods
+      kubernetes.core.k8s_scale:
+        api_version: v1
+        kind: Deployment
+        name: clixx-web-deployment
+        # namespace: "{{ namespace }}"
+        current_replicas: 1
+        replicas: 0
+        wait: false
+      ignore_errors: yes           
+
+
+    - name: create deployment
+      k8s:
+        state: present
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: clixx-web-deployment
+              #namespace: clixx-deployment
+            labels:
+              app: clixx-web-app
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: clixx-web-app
+            template:
+              metadata:
+                labels:
+                  app: clixx-web-app
+              spec:
+              containers:
+                - name: clixx-web-app
+                  image: 336528460023.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixx-image-1.0.170
+                  imagePullPolicy: Always
+                  ports:
+                  - containerPort: 80
+
+
+
+
+
+          # kind: Deployment
+          # metadata:
+          #   name: ieweb-jost-app
+          #   namespace: "{{ namespace }}"
+          #   labels:
+          #     app: ieweb-jost-app
+          # spec:
+          #   replicas: 1
+          #   selector:
+          #     matchLabels:
+          #       app: ieweb-jost-app
+          #   template:
+          #     metadata:
+          #       labels:
+          #         app: ieweb-jost-app
+          #     spec:
+          #       volumes:
+          #       - name: orawallet
+          #         hostPath:
+          #          path: /usr/share/dmaps/wallet
+          #          type: Directory
+          #       containers:
+          #       - name: ieweb-jost-app
+          #         image: ec2-18-252-197-181.us-gov-east-1.compute.amazonaws.com:9001/ieweb-jost-app:latest
+          #         imagePullPolicy: Always
+          #         validate_certs: no
+          #         volumeMounts:
+          #          - mountPath: /usr/share/dmaps/wallet
+          #            name: orawallet
+          #            readOnly: true
+          #         ports:
+          #         containerPort: 8070
+          #         env:
+          #         - name: JOST_DATASOURCE_USERNAME
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.datasource
+          #               key: username
+          #         - name: JOST_DATASOURCE_PASSWD
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.datasource
+          #               key: password
+          #         - name: JOST_DATASOURCE_SCHEMA
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.datasource
+          #               key: schema
+          #         - name: JOST_DATASOURCE_URL
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.datasource
+          #               key: url 
+          #         - name: JOST_APPLICATION_SERVERPORT
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: server.port
+          #         - name: JOST_APPLICATION_NAME
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: name
+          #         - name: JOST_APPLICATION_JWTSECRET
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: jwt.secret
+          #         - name: JOST_APPLICATION_DMAPSSECRET
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: dmaps.secret
+          #         - name: JOST_APPLICATION_LOGLEVEL
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: logging_level
+          #         - name: JOST_CROSSORIGIN
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: crossOrigin
+          #         - name: JOST_TRUSTEDISSUERS
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.application
+          #               key: trustedIssuers
+          #         - name: JOST_JPA_FORMAT_SQL
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.jpa
+          #               key: hibernate.formatsql
+          #         - name: JOST_JPA_DATABASE
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.jpa
+          #               key: database
+          #         - name: JOST_JPA_DDL_AUTO
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.jpa
+          #               key: hibernate.ddl-auto
+          #         - name: JOST_JPA_SHOW_SQL
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.jpa
+          #               key: hibernate.showsql
+          #         - name: JOST_EUREKA_INSTANCE_PREFER_IP
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.eureka
+          #               key: instance.preferIPAddress
+          #         - name: JOST_EUREKA_INSTANCE_HOSTNAME
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.eureka
+          #               key: instance.hostname
+          #         - name: JOST_EUREKA_CLIENT_REGISTER
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.eureka
+          #               key: client.registerWithEureka 
+          #         - name: JOST_EUREKA_CLIENT_FETCH_REGISTRY
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.eureka
+          #               key: client.fetchRegistry 
+          #         - name: JOST_EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.eureka
+          #               key: client.serviceURL.defaultzone
+          #         - name: JOST_IE_DATASOURCE_ORA_WALLET_ENABLED
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.wallet
+          #               key: wallet.enabled
+          #         - name: JOST_IE_DATASOURCE_ORA_WALLET_TNSPATH
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.wallet
+          #               key: wallet.tnspath
+          #         - name: JOST_IE_DATASOURCE_ORA_WALLET_LOCATION
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.wallet
+          #               key: wallet.location
+          #         - name: JOST_IE_DATASOURCE_WALLET_URL
+          #           valueFrom:
+          #             secretKeyRef:
+          #               name: jost.wallet
+          #               key: wallet.url
+
