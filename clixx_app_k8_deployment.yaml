@@ -32,16 +32,16 @@
          
 
 
-    - name: scale deployment down to 0 pods
-      kubernetes.core.k8s_scale:
-        api_version: v1
-        kind: Deployment
-        name: clixx-web-deployment
-        # namespace: "{{ namespace }}"
-        current_replicas: 1
-        replicas: 0
-        wait: false
-      ignore_errors: yes           
+    # - name: scale deployment down to 0 pods
+    #   kubernetes.core.k8s_scale:
+    #     api_version: v1
+    #     kind: Deployment
+    #     name: clixx-web-deployment
+    #     # namespace: "{{ namespace }}"
+    #     current_replicas: 1
+    #     replicas: 0
+    #     wait: false
+    #   ignore_errors: yes           
 
 
     - name: create deployment
