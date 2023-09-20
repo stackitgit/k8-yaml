@@ -17,7 +17,7 @@
           kind: Service
           metadata:
             name: clixx-service
-              namespace: default
+            namespace: default
             labels:
               app: clixx-web-app
               new_serv: CLIXX
