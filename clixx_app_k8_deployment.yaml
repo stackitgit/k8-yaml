@@ -13,7 +13,7 @@
       k8s:
         state: present
         definition:
-          apiVersion: v1
+          apiVersion: v2
           kind: Service
           metadata:
             name: clixx-service
