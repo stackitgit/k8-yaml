@@ -53,7 +53,7 @@
           kind: Deployment
           metadata:
             name: clixx-web-deployment
-              # namespace: clixx-deployment
+            namespace: clixx-deployment
             labels:
               app: clixx-web-app
           spec:
