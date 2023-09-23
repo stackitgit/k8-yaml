@@ -34,8 +34,8 @@
 
 
     - name: scale deployment down to 0 pods
-      # kubernetes.core.k8s_scale:
-      k8s:
+      kubernetes.core.k8s_scale:
+      # k8s:
         api_version: v1
         kind: Deployment
         name: clixx-web-deployment
@@ -46,33 +46,33 @@
       ignore_errors: yes           
 
 
-    - name: create deployment
-      k8s:
-        state: present
-        definition:
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: clixx-web-deployment
-            namespace: default
-            labels:
-              app: clixx-web-app
-          spec:
-            replicas: 2
-            selector:
-              matchLabels:
-                app: clixx-web-app
-            template:
-              metadata:
-                labels:
-                  app: clixx-web-app
-              spec:
-              containers:
-                - name: clixx-web-app
-                  image: 336528460023.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixx-image-1.0.170
-                  imagePullPolicy: Always
-                  ports:
-                  - containerPort: 80
+    # - name: create deployment
+    #   k8s:
+    #     state: present
+    #     definition:
+    #       apiVersion: apps/v1
+    #       kind: Deployment
+    #       metadata:
+    #         name: clixx-web-deployment
+    #         namespace: default
+    #         labels:
+    #           app: clixx-web-app
+    #       spec:
+    #         replicas: 2
+    #         selector:
+    #           matchLabels:
+    #             app: clixx-web-app
+    #         template:
+    #           metadata:
+    #             labels:
+    #               app: clixx-web-app
+    #           spec:
+    #           containers:
+    #             - name: clixx-web-app
+    #               image: 336528460023.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixx-image-1.0.170
+    #               imagePullPolicy: Always
+    #               ports:
+    #               - containerPort: 80
 
 
 
